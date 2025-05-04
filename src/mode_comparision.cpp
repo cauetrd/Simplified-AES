@@ -14,6 +14,7 @@
 #include "files.h"
 #include "osrng.h"
 #include "hex.h"
+#include "base64.h"
 
 #include <string>
 
@@ -24,24 +25,23 @@ std::string CTR_mode_AES_encryption(
     const std::string& plain,
     const CryptoPP::SecByteBlock& key,
     const CryptoPP::SecByteBlock& iv
-) 
-{
+) {
   using namespace CryptoPP;
 
   std::string cipher;
-  try
-  {
+  try {
       CTR_Mode< AES >::Encryption e;
       e.SetKeyWithIV(key, key.size(), iv);
 
       StringSource s(plain, true, 
           new StreamTransformationFilter(e,
-              new StringSink(cipher)
+              new Base64Encoder(
+                new StringSink(cipher),
+                false
+              )
           ) // StreamTransformationFilter
       ); // StringSource
-  }
-  catch(const Exception& e)
-  {
+  } catch(const Exception& e) {
       std::cerr << e.what() << std::endl;
       exit(1);
   }
@@ -53,26 +53,23 @@ std::string CTR_mode_AES_decryption(
     const std::string& cipher,
     const CryptoPP::SecByteBlock& key,
     const CryptoPP::SecByteBlock& iv
-) 
-{
+) {
   using namespace CryptoPP;
 
   std::string recovered;
 
-  try
-  {
+  try {
       CTR_Mode< AES >::Decryption d;
       d.SetKeyWithIV(key, key.size(), iv);
 
       StringSource s(cipher, true, 
-          new StreamTransformationFilter(d,
-              new StringSink(recovered)
-          ) // StreamTransformationFilter
+          new Base64Decoder(
+              new StreamTransformationFilter(d,
+                  new StringSink(recovered)
+              ) // StreamTransformationFilter
+          ) // Base64Decoder
       ); // StringSource
-
-  }
-  catch(const Exception& e)
-  {
+  } catch(const Exception& e) {
       std::cerr << e.what() << std::endl;
       exit(1);
   }
@@ -86,24 +83,23 @@ std::string OFB_mode_AES_encryption(
     const std::string& plain,
     const CryptoPP::SecByteBlock& key,
     const CryptoPP::SecByteBlock& iv
-) 
-{
+) {
   using namespace CryptoPP;
 
   std::string cipher;
-  try
-  {
+  try {
       OFB_Mode< AES >::Encryption e;
       e.SetKeyWithIV(key, key.size(), iv);
 
       StringSource s(plain, true, 
           new StreamTransformationFilter(e,
-              new StringSink(cipher)
+              new Base64Encoder(
+                new StringSink(cipher),
+                false
+              )
           ) // StreamTransformationFilter
       ); // StringSource
-  }
-  catch(const Exception& e)
-  {
+  } catch(const Exception& e) {
       std::cerr << e.what() << std::endl;
       exit(1);
   }
@@ -115,26 +111,23 @@ std::string OFB_mode_AES_decryption(
     const std::string& cipher,
     const CryptoPP::SecByteBlock& key,
     const CryptoPP::SecByteBlock& iv
-) 
-{
+) {
   using namespace CryptoPP;
 
   std::string recovered;
 
-  try
-  {
+  try {
       OFB_Mode< AES >::Decryption d;
       d.SetKeyWithIV(key, key.size(), iv);
 
       StringSource s(cipher, true, 
-          new StreamTransformationFilter(d,
-              new StringSink(recovered)
-          ) // StreamTransformationFilter
+          new Base64Decoder(
+              new StreamTransformationFilter(d,
+                  new StringSink(recovered)
+              ) // StreamTransformationFilter
+          ) // Base64Decoder
       ); // StringSource
-
-  }
-  catch(const Exception& e)
-  {
+  } catch(const Exception& e) {
       std::cerr << e.what() << std::endl;
       exit(1);
   }
@@ -160,7 +153,10 @@ std::string CFB_mode_AES_encryption(
 
       StringSource s(plain, true, 
           new StreamTransformationFilter(e,
-              new StringSink(cipher)
+              new Base64Encoder(
+                new StringSink(cipher),
+                false
+              )
           ) // StreamTransformationFilter
       ); // StringSource
   }
@@ -177,26 +173,23 @@ std::string CFB_mode_AES_decryption(
     const std::string& cipher,
     const CryptoPP::SecByteBlock& key,
     const CryptoPP::SecByteBlock& iv
-) 
-{
+) {
   using namespace CryptoPP;
 
   std::string recovered;
 
-  try
-  {
+  try {
       CFB_Mode< AES >::Decryption d;
       d.SetKeyWithIV(key, key.size(), iv);
 
       StringSource s(cipher, true, 
-          new StreamTransformationFilter(d,
-              new StringSink(recovered)
-          ) // StreamTransformationFilter
+          new Base64Decoder(
+              new StreamTransformationFilter(d,
+                  new StringSink(recovered)
+              ) // StreamTransformationFilter
+          ) // Base64Decoder
       ); // StringSource
-
-  }
-  catch(const Exception& e)
-  {
+  } catch(const Exception& e) {
       std::cerr << e.what() << std::endl;
       exit(1);
   }
@@ -221,7 +214,10 @@ std::string ECB_mode_AES_encryption(
 
       StringSource s(plain, true, 
           new StreamTransformationFilter(e,
-              new StringSink(cipher)
+              new Base64Encoder(
+                new StringSink(cipher),
+                false
+              )
           ) // StreamTransformationFilter
       ); // StringSource
   }
@@ -237,26 +233,23 @@ std::string ECB_mode_AES_encryption(
 std::string ECB_mode_AES_decryption(
     const std::string& cipher,
     const CryptoPP::SecByteBlock& key
-) 
-{
+) {
   using namespace CryptoPP;
 
   std::string recovered;
 
-  try
-  {
+  try {
       ECB_Mode< AES >::Decryption d;
       d.SetKey(key, key.size());
 
       StringSource s(cipher, true, 
-          new StreamTransformationFilter(d,
-              new StringSink(recovered)
-          ) // StreamTransformationFilter
+          new Base64Decoder(
+              new StreamTransformationFilter(d,
+                  new StringSink(recovered)
+              ) // StreamTransformationFilter
+          ) // Base64Decoder
       ); // StringSource
-
-  }
-  catch(const Exception& e)
-  {
+  } catch(const Exception& e) {
       std::cerr << e.what() << std::endl;
       exit(1);
   }
@@ -282,7 +275,10 @@ std::string CBC_mode_AES_encryption(
 
       StringSource s(plain, true, 
           new StreamTransformationFilter(e,
-              new StringSink(cipher)
+              new Base64Encoder(
+                new StringSink(cipher),
+                false
+              )
           ) // StreamTransformationFilter
       ); // StringSource
   }
@@ -299,23 +295,21 @@ std::string CBC_mode_AES_decryption(
     const std::string& cipher,
     const CryptoPP::SecByteBlock& key,
     const CryptoPP::SecByteBlock& iv
-) 
-{
+) {
   using namespace CryptoPP;
 
   std::string recovered;
 
-  try
-  {
+  try {
       CBC_Mode< AES >::Decryption d;
       d.SetKeyWithIV(key, key.size(), iv);
-
       StringSource s(cipher, true, 
-          new StreamTransformationFilter(d,
-              new StringSink(recovered)
-          ) // StreamTransformationFilter
+          new Base64Decoder(
+              new StreamTransformationFilter(d,
+                  new StringSink(recovered)
+              ) // StreamTransformationFilter
+          ) // Base64Decoder
       ); // StringSource
-
   }
   catch(const Exception& e)
   {
@@ -326,13 +320,11 @@ std::string CBC_mode_AES_decryption(
   return recovered;
 }
 
-std::vector<long> get_mode_duration() 
+std::vector<long> get_mode_duration(bool print = false) 
 {
   using namespace CryptoPP;
 
   AutoSeededRandomPool prng;
-  HexEncoder encoder(new FileSink(std::cout));
-  BaseN_Encoder base64_encoder(new FileSink(std::cout));
 
   SecByteBlock key(AES::DEFAULT_KEYLENGTH);
   SecByteBlock iv(AES::BLOCKSIZE);
@@ -340,7 +332,7 @@ std::vector<long> get_mode_duration()
   prng.GenerateBlock(key, key.size());
   prng.GenerateBlock(iv, iv.size());
 
-  std::string plain = "ZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMuZXhhbXBsZWZpbGUuY29tfFlvdXJFeGFtcGxlRmlsZXMu";
+  std::string plain = "Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet. ";
 
   std::string cipher;
 
@@ -359,6 +351,11 @@ std::vector<long> get_mode_duration()
   auto ecb_duration = std::chrono::duration_cast<std::chrono::microseconds>(p2_ecb - p1_ecb).count();
 
   durations.push_back(ecb_duration);
+  
+  if (print) {
+    std::cout << "ECB mode:" << std::endl;
+    std::cout << "CipherText base64: " << cipher << std::endl;
+  }
 
   /*********************************\
    * CBC mode
@@ -374,6 +371,11 @@ std::vector<long> get_mode_duration()
 
   durations.push_back(cbc_duration);
 
+  if (print) {
+    std::cout << "CBC mode:" << std::endl;
+    std::cout << "CipherText base64: " << cipher << std::endl;
+  }
+
   /*********************************\
    * CFB mode
   \*********************************/
@@ -387,6 +389,11 @@ std::vector<long> get_mode_duration()
   auto cfb_duration = std::chrono::duration_cast<std::chrono::microseconds>(p2_cfb - p1_cfb).count();
 
   durations.push_back(cfb_duration);
+
+  if (print) {
+    std::cout << "CFB mode:" << std::endl;
+    std::cout << "CipherText base64: " << cipher << std::endl;
+  }
 
   /*********************************\
    * OFB mode
@@ -402,6 +409,11 @@ std::vector<long> get_mode_duration()
 
   durations.push_back(ofb_duration);
 
+  if (print) {
+    std::cout << "OFB mode:" << std::endl;
+    std::cout << "CipherText base64: " << cipher << std::endl;
+  }
+
   /*********************************\
    * CTR mode
   \*********************************/
@@ -416,12 +428,19 @@ std::vector<long> get_mode_duration()
 
   durations.push_back(ctr_duration);
 
+  if (print) {
+    std::cout << "CTR mode:" << std::endl;
+    std::cout << "CipherText base64: " << cipher << std::endl;
+  }
+
   return durations;
 }
 
 void test_mode_comp() 
 {
   using namespace CryptoPP;
+
+  get_mode_duration(true);
 
   std::vector<long> durations(5, 0);
 
@@ -439,7 +458,7 @@ void test_mode_comp()
     durations[i] /= 100;
   }
 
-  std::cout << "Média de duração (in microseconds):" << std::endl;
+  std::cout << "Média de duração para 100 execuções (in microseconds):" << std::endl;
   std::cout << "ECB: " << durations[0] << std::endl;
   std::cout << "CBC: " << durations[1] << std::endl;
   std::cout << "CFB: " << durations[2] << std::endl;

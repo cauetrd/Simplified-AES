@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#include "base64.h"
+#include "simple_base64.h"
 #include "saes.h"
 
 /******************************* SAES Global Variables ***************************************/
@@ -66,14 +66,18 @@ uint8_t key_expansion_subnibble(uint8_t word) {
   return Sbox[upper] << 4 | Sbox[lower];    
 }
 
-std::vector<uint16_t> saes_key_expansion(uint16_t key) {
+std::vector<uint16_t> saes_key_expansion(uint16_t key, bool print = false) {
   std::vector<uint16_t> keys (3, 0);
 
-  std::cout << "Expansão da chave: " << std::endl;
+  if (print) {
+    std::cout << "Expansão da chave: " << std::endl;
+  }
 
   keys[0] = key;
 
-  std::cout << "Chave 1: 0x" << std::hex << keys[0] << std::endl;
+  if (print) {
+    std::cout << "Chave 1: 0x" << std::hex << keys[0] << std::endl;
+  }
 
   uint8_t w0 = (keys[0] >> 8) & 0xFF;
   uint8_t w1 = keys[0] & 0xFF;
@@ -83,14 +87,18 @@ std::vector<uint16_t> saes_key_expansion(uint16_t key) {
 
   keys[1] = w2 << 8 | w3;
 
-  std::cout << "Chave 2: 0x" << std::hex << keys[1] << std::endl;
+  if (print) {
+    std::cout << "Chave 2: 0x" << std::hex << keys[1] << std::endl;
+  }
 
   uint8_t w4 = w2 ^ RCON[1] ^ key_expansion_subnibble(rotate_nibble(w3));
   uint8_t w5 = w4 ^ w3;
 
   keys[2] = w4 << 8 | w5;
 
-  std::cout << "Chave 3: 0x" << std::hex << keys[2] << std::endl;
+  if (print) {
+    std::cout << "Chave 3: 0x" << std::hex << keys[2] << std::endl;
+  }
 
   return keys;
 }
@@ -203,42 +211,58 @@ std::vector<std::vector<uint8_t> > saes_inverse_mix_columns(std::vector<std::vec
   return result;
 }
 
-uint16_t saes_decrypt(uint16_t cipherText, uint16_t key) {
+uint16_t saes_decrypt(uint16_t cipherText, uint16_t key, bool print = false) {
   std::vector<std::vector<uint8_t> > state = convert_int_to_state_matrix(cipherText);
 
-  std::vector<uint16_t> keys = saes_key_expansion(key);
+  std::vector<uint16_t> keys = saes_key_expansion(key, print);
 
   state = saes_add_round_key(state, keys[2]);
 
-  std::cout << "Estado após a adição da chave 3: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a adição da chave 3: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_shift_rows(state);
 
-  std::cout << "Estado após a troca de linhas 1: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a troca de linhas 1: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
   
   state = saes_nibble_substitution(state, InverseSbox);
 
-  std::cout << "Estado após a substituição de nibbles com a sbox invertida: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a substituição de nibbles com a sbox invertida: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_add_round_key(state, keys[1]);
 
-  std::cout << "Estado após a adição da chave 2: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a adição da chave 2: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_inverse_mix_columns(state);
 
-  std::cout << "Estado após a mistura de colunas inversa: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a mistura de colunas inversa: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_shift_rows(state);
 
-  std::cout << "Estado após a troca de linhas 2: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a troca de linhas 2: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
   
   state = saes_nibble_substitution(state, InverseSbox);
 
-  std::cout << "Estado após a substituição de nibbles com a sbox invertida: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a substituição de nibbles com a sbox invertida: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_add_round_key(state, keys[0]);
 
-  std::cout << "Estado após a adição da chave 1: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a adição da chave 1: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   uint16_t result = convert_state_matrix_to_int(state);
 
@@ -267,7 +291,7 @@ std::string saes_decrypt_base64(std::string base64cipherText, std::string base64
   // Transform the key into a 16-bit word
   uint16_t key = decodedKey[0] << 8 | decodedKey[1];
 
-  uint16_t result = saes_decrypt(cipherText, key);
+  uint16_t result = saes_decrypt(cipherText, key, true);
 
   BYTE resultBytes[2] = {0, 0};
   resultBytes[0] = (result >> 8) & 0xFF;
@@ -292,42 +316,58 @@ std::vector<std::vector<uint8_t> > saes_mix_columns(std::vector<std::vector<uint
   return result;
 }
 
-std::uint16_t saes_encrypt(uint16_t plainText, uint16_t key) {
+std::uint16_t saes_encrypt(uint16_t plainText, uint16_t key, bool print = false) {
   std::vector<std::vector<uint8_t> > state = convert_int_to_state_matrix(plainText);
 
-  std::vector<uint16_t> keys = saes_key_expansion(key);
+  std::vector<uint16_t> keys = saes_key_expansion(key, print);
 
   state = saes_add_round_key(state, keys[0]); 
 
-  std::cout << "Estado após a adição da chave 1: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a adição da chave 1: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
   
   state = saes_nibble_substitution(state, Sbox);
 
-  std::cout << "Estado após a substituição de nibbles: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a substituição de nibbles: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_shift_rows(state);
 
-  std::cout << "Estado após a troca de linhas 1: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a troca de linhas 1: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
   
   state = saes_mix_columns(state);
 
-  std::cout << "Estado após a mistura de colunas: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a mistura de colunas: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_add_round_key(state, keys[1]);
 
-  std::cout << "Estado após a adição da chave 2: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a adição da chave 2: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_nibble_substitution(state, Sbox);
 
-  std::cout << "Estado após a substituição de nibbles: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a substituição de nibbles: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   state = saes_shift_rows(state);
 
-  std::cout << "Estado após a troca de linhas 2: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a troca de linhas 2: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
   
   state = saes_add_round_key(state, keys[2]);
 
-  std::cout << "Estado após a adição da chave 3: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  if (print) {
+    std::cout << "Estado após a adição da chave 3: 0x" << std::hex << convert_state_matrix_to_int(state) << std::endl;
+  }
 
   uint16_t result = convert_state_matrix_to_int(state);
 
@@ -356,7 +396,7 @@ std::string saes_encrypt_base64(std::string base64plainText, std::string base64k
   // Transform the key into a 16-bit word
   uint16_t key = decodedKey[0] << 8 | decodedKey[1];
 
-  uint16_t result = saes_encrypt(input, key);
+  uint16_t result = saes_encrypt(input, key, true);
 
   BYTE resultBytes[2] = {0, 0};
   resultBytes[0] = (result >> 8) & 0xFF;
