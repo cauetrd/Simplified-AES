@@ -5,7 +5,7 @@
 int main() {
   int operation;
 
-  std::cout << "Bem vindo ao programa SAES do vini" << std::endl;
+  std::cout << "Bem vindo ao programa SAES" << std::endl;
 
   std::cout << "Por favor selecione uma operação" << std::endl;
 
